@@ -12,63 +12,28 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <poi.version>5.4.1</poi.version>
-        <angus-mail.version>2.0.3</angus-mail.version>
-        <slf4j.version>2.0.16</slf4j.version>
-        <log4j.version>2.24.3</log4j.version>
     </properties>
 
     <dependencies>
-        <!-- Apache POI: "poi" lê .xls (HSSF); "poi-ooxml" lê .xlsx (XSSF). -->
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>${poi.version}</version>
-        </dependency>
+        <!-- Apache POI: leitura de .xlsx -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>${poi.version}</version>
+            <version>5.4.1</version>
         </dependency>
 
-        <!-- Jakarta Mail (antigo JavaMail): API jakarta.mail + implementação Eclipse Angus (IMAP/SMTP). -->
+        <!-- Jakarta Mail (JavaMail): leitura de e-mail -->
         <dependency>
             <groupId>org.eclipse.angus</groupId>
             <artifactId>angus-mail</artifactId>
-            <version>${angus-mail.version}</version>
+            <version>2.0.3</version>
         </dependency>
 
-        <!-- Logs: SLF4J com saída simples no console. -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!-- O POI loga via Log4j API; esta ponte manda esses logs para o SLF4J (mesma saída do worker). -->
+        <!-- O POI usa Log4j internamente; sem isto ele imprime um erro de "logging provider" -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-to-slf4j</artifactId>
-            <version>${log4j.version}</version>
+            <artifactId>log4j-core</artifactId>
+            <version>2.24.3</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Permite rodar com: mvn compile exec:java -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.5.0</version>
-                <configuration>
-                    <mainClass>org.example.Main</mainClass>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
