@@ -1,88 +1,57 @@
-# Worker de planilhas (Java puro + Apache POI + Jakarta Mail)
+# Worker de planilhas (Java + Apache POI + MySQL)
 
-Worker simples que pega uma planilha Excel, lê com o Apache POI, valida os dados e "grava" no banco. Por enquanto a gravação é só um log com o SQL que seria executado.
+Segue o padrão do repositório [SPTECH-LP/leitura-arquivos-excel](https://github.com/SPTECH-LP/leitura-arquivos-excel): um `LeitorExcel` que abre o `.xlsx` com `XSSFWorkbook`, classes simples com getters e setters e um `Main` que chama tudo.
 
-Planilha usada: `01. a 03. Chegadas de turistas internacionais ao Brasil__A2022-2021-V49-1ed.xlsx` (raiz do projeto), aba `Brasil_1.1`.
+Planilha usada: `01. a 03. Chegadas de turistas internacionais ao Brasil__A2022-2021-V49-1ed.xlsx` (raiz do projeto).
+
+## Banco (MySQL no Docker)
+
+O `script.sql` cria o banco `traveline` e uma agência fake (`idAgencia = 1`, usada como constante no `Main`).
+
+```bash
+docker run -d --name mysql-traveline -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -v "$PWD/script.sql:/docker-entrypoint-initdb.d/script.sql:ro" mysql:8.0
+```
+
+Depois disso, basta `docker start mysql-traveline`. As credenciais do banco e do e-mail ficam no `.env` da raiz (fora do git; copie o `.env.example`). Enquanto `EMAIL_HOST`, `EMAIL_USUARIO` e `EMAIL_SENHA` estiverem vazios, o e-mail só é impresso no console.
 
 ## Como rodar
 
-Execute a classe `Main` no IntelliJ.
+Execute a classe `Main` no IntelliJ. Cada execução registra uma nova linha em `planilha` e grava os turistas ligados a ela.
 
 ## Classes
 
-Todas ficam em `src/main/java/org/example/`:
-
 | Classe | O que faz |
 |---|---|
-| `Main` | Chama as etapas na ordem. Comece a leitura por ela. |
-| `LeitorEmail` | Busca o anexo `.xlsx` no e-mail (Jakarta Mail). |
-| `LeitorPlanilha` | Lê a planilha com Apache POI e cria os objetos `ChegadaTurista`. |
-| `ChegadaTurista` | O dado que vai para o banco (continente, país, via, ano, quantidade). |
-| `Validador` | Diz se um registro pode ir para o banco. |
-| `ChegadaTuristaDao` | CRUD. Hoje só imprime o SQL no console. |
+| `Main` | Lê a planilha e grava no banco. |
+| `LeitorExcel` | Lê as abas com Apache POI e cria os objetos. |
+| `TuristaPorPais` / `TuristaPorEstado` | Os dados lidos (país ou estado, meio, ano, mês, quantidade). |
+| `Conexao` | Abre a conexão JDBC com o MySQL. |
+| `PlanilhaDao` | Insere a planilha (`PROCESSANDO`) e muda para `CONCLUIDA` ou `ERRO`. |
+| `RecomendacaoDao` | Monta o top 10 de países e de estados e grava em `recomendacoes`. |
+| `EnviadorEmail` | Manda as recomendações para o e-mail da agência (Jakarta Mail, SMTP). |
+| `Config` | Lê o `.env`. |
+| `TuristaDao` | Insere os turistas e cadastra `pais`, `estado` e `meio` quando ainda não existem. |
 
-## O fluxo
+## De onde vem cada dado
 
-```
-e-mail ou arquivo do disco
-        ▼
-LeitorPlanilha   (Apache POI: Workbook -> Sheet -> Row -> Cell)
-        ▼
-List<ChegadaTurista>
-        ▼
-Validador        (válido? se não, loga e descarta)
-        ▼
-ChegadaTuristaDao.inserir()   (hoje: só o log do INSERT)
-```
+| Tabela | Abas |
+|---|---|
+| `turista_por_pais_mes` e `pais` | `Brasil_1.3` (aérea), `Brasil_1.4` (terrestre), `Brasil_1.5` (marítima), `Brasil_1.6` (fluvial) |
+| `turista_por_estado_mes` e `estado` | `SÍNTESE BRASIL_3.4` (aérea), `SINTESE BRASIL_3.5-3.6` (terrestre e marítima), `SINTESE BRASIL_3.7` (fluvial) |
 
-### 1. Pegar o arquivo
+A via vem do título de cada tabela e vira o `meio`: aérea = Avião, terrestre = Ônibus, marítima = Navio, fluvial = Barco.
 
-No `Main`, a variável `USAR_EMAIL` escolhe a origem:
+Ficam de fora: a linha "Brasil" (total geral), "Países não especificados" e "Outras Unidades da Federação" (não têm sigla).
 
-- `false` (padrão): abre o `.xlsx` da raiz do projeto com `FileInputStream`.
-- `true`: usa o `LeitorEmail`. Preencha `host`, `usuario` e `senha` nele (no Gmail, use uma "senha de app"). O caminho no Jakarta Mail é `Session` → `Store` (conexão) → `Folder` (INBOX) → `Message` (e-mail) → `Multipart` (partes do e-mail) → `Part` (o anexo). O primeiro anexo `.xlsx` encontrado, do e-mail mais novo para o mais antigo, é devolvido como `InputStream`.
+## Recomendações
 
-Nos dois casos, o resultado é um `InputStream` que vai para o `LeitorPlanilha`.
+Depois de gravar a planilha, o `Main` pega o top 10 de países e o top 10 de estados (soma de 2019 a 2021) e grava 20 linhas em `recomendacoes`:
 
-### 2. Ler a planilha (Apache POI)
-
-Todo o Apache POI está no `LeitorPlanilha`:
-
-| POI | O que é | No código |
-|---|---|---|
-| `Workbook` | o arquivo inteiro | `new XSSFWorkbook(arquivo)` |
-| `Sheet` | uma aba | `workbook.getSheet("Brasil_1.1")` |
-| `Row` | uma linha (começa em 0) | `for (Row row : sheet)` |
-| `Cell` | uma célula (coluna A = 0, B = 1...) | `row.getCell(1)` |
-
-Como a aba está organizada:
-
-- Coluna B: nome do continente (com espaços na frente) ou do país.
-- Colunas D a V: quantidades em blocos de 3 anos (2019, 2020, 2021). As vias são Total (D), Aérea (H), Terrestre (L), Marítima (P) e Fluvial (T).
-
-Regras da leitura:
-
-- Linhas sem número na coluna D (título, cabeçalho, rodapé) são puladas.
-- A linha "Brasil" é o total geral e também é pulada.
-- A linha de um continente só guarda o nome dele para os países que vêm abaixo.
-- Cada país vira 15 objetos `ChegadaTurista` (5 vias × 3 anos). Com a planilha atual são 92 países, o que dá 1.380 registros.
-
-Atenção: no POI, `getNumericCellValue()` só funciona em célula numérica, e `getStringCellValue()` só em célula de texto. Por isso o código verifica `getCellType()` antes de ler.
-
-### 3. Validar
-
-O `Validador` rejeita registros sem continente ou com quantidade negativa. Os rejeitados aparecem no console com `[VALIDACAO]` e não vão para o banco.
-
-### 4. Gravar (CRUD)
-
-O `ChegadaTuristaDao` tem `inserir`, `buscar`, `atualizar` e `deletar`. Hoje cada método só imprime o SQL:
-
-```
-[CRUD] INSERT INTO chegada_turista (continente, pais, via_acesso, ano, quantidade) VALUES ('África', 'Angola', 'AEREA', 2019, 19090)
-```
-
-Para ligar num banco de verdade, adicione o driver JDBC no `pom.xml` e troque o `System.out.println` de cada método por um `PreparedStatement` com o mesmo SQL.
+- `pontuacao`: % do total de turistas
+- `nivel`: 1º ao 3º ALTO, 4º ao 7º MÉDIO, 8º ao 10º BAIXO
+- `sazonalidade`: mês com mais turistas
+- `idLocalDestino`: `idpais` ou `idestado` (a tabela ainda não tem uma coluna dizendo qual dos dois)
 
 ## Logs
 
-Cada etapa imprime com um prefixo, para você achar no console onde cada coisa acontece: `[MAIN]`, `[EMAIL]`, `[POI]`, `[VALIDACAO]`, `[CRUD]`.
+Cada etapa imprime com um prefixo: `[MAIN]`, `[POI]`, `[BANCO]`, `[EMAIL]`.
