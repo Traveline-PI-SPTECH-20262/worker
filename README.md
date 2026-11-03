@@ -18,6 +18,20 @@ Depois disso, basta `docker start mysql-traveline`. As credenciais do banco e do
 
 Execute a classe `Main` no IntelliJ. Cada execução registra uma nova linha em `planilha` e grava os turistas ligados a ela.
 
+## Rodando com Docker
+
+Com o MySQL de pé, gere a imagem e rode o worker. O `DB_URL` aponta para o MySQL da sua máquina (`host.docker.internal`):
+
+```bash
+docker build -t traveline-worker .
+```
+
+```bash
+docker run --rm --env-file .env -e DB_URL=jdbc:mysql://host.docker.internal:3306/traveline traveline-worker
+```
+
+As variáveis de ambiente têm prioridade sobre o `.env`.
+
 ## Classes
 
 | Classe | O que faz |

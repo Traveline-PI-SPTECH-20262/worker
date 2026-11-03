@@ -6,6 +6,7 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 
 public class EnviadorEmail {
@@ -54,7 +55,7 @@ public class EnviadorEmail {
                       : "\nTop 10 estados mais visitados:\n");
             }
             posicao++;
-            texto.append(String.format("%2d. %s - %,d turistas (%.2f%%), nível %s, pico em %s%n",
+            texto.append(String.format(Locale.of("pt", "BR"), "%2d. %s - %,d turistas (%.2f%%), nível %s, pico em %s%n",
                   posicao, r.getNome(), r.getTotalTuristas(), r.getPontuacao(), r.getNivel(), r.getSazonalidade()));
         }
         return texto.toString();
