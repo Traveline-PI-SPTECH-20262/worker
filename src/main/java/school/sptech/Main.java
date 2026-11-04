@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    private static final Integer ID_AGENCIA = 1;
+    private static final Integer ID_AGENCIA = Integer.valueOf(Config.get("ID_AGENCIA")) || 1;
 
     public static void main(String[] args) throws Exception {
         String nomeArquivo = "01. a 03. Chegadas de turistas internacionais ao Brasil__A2022-2021-V49-1ed.xlsx";
