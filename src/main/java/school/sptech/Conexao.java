@@ -9,7 +9,7 @@ public class Conexao {
 
     public static Connection getConexao() throws SQLException {
 
-        String url = "jdbc:mysql://100.54.110.112:3306/traveline";
+        String url = "jdbc:mysql://54.234.69.177:3306/traveline";
         String usuario = "root";
         String senha = "urubu100";
 
