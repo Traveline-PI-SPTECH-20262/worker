@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 public class Main {
-    private static final Integer ID_AGENCIA = Config.get("ID_AGENCIA").isEmpty() ? 1 : Integer.valueOf(Config.get("ID_AGENCIA"));
+    private static final Integer ID_AGENCIA = 1;
     public static void main(String[] args) throws Exception {
         String nomeArquivo = "01. a 03. Chegadas de turistas internacionais ao Brasil__A2022-2021-V49-1ed.xlsx";
         System.out.println("[MAIN] Iniciando worker para a agência " + ID_AGENCIA);
