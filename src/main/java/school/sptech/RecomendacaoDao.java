@@ -26,13 +26,13 @@ public class RecomendacaoDao {
     }
 
     public List<Recomendacao> buscarTopEstados(Integer idPlanilha) throws SQLException {
-        String sql = "SELECT e.idestado, e.nome, SUM(t.quantidade_turista) AS total, "
-              + "(SELECT t2.mes FROM turista_por_estado_mes t2 WHERE t2.estado_idestado = e.idestado AND t2.planilha_idplanilha = t.planilha_idplanilha "
+        String sql = "SELECT u.iduf, u.nome, SUM(t.quantidade_turista) AS total, "
+              + "(SELECT t2.mes FROM turista_por_estado_mes t2 WHERE t2.uf_iduf = u.iduf AND t2.planilha_idplanilha = t.planilha_idplanilha "
               + " GROUP BY t2.mes ORDER BY SUM(t2.quantidade_turista) DESC LIMIT 1) AS pico, "
               + "SUM(t.quantidade_turista) * 100 / (SELECT SUM(quantidade_turista) FROM turista_por_estado_mes WHERE planilha_idplanilha = t.planilha_idplanilha) AS percentual "
-              + "FROM turista_por_estado_mes t JOIN estado e ON e.idestado = t.estado_idestado "
+              + "FROM turista_por_estado_mes t JOIN uf u ON u.iduf = t.uf_iduf "
               + "WHERE t.planilha_idplanilha = ? "
-              + "GROUP BY e.idestado, e.nome, t.planilha_idplanilha ORDER BY total DESC LIMIT 10";
+              + "GROUP BY u.iduf, u.nome, t.planilha_idplanilha ORDER BY total DESC LIMIT 10";
         return buscarTop(sql, "Estado", idPlanilha);
     }
 

@@ -34,7 +34,7 @@ public class TuristaDao {
     }
 
     public void inserirPorEstado(TuristaPorEstado turista, Integer idPlanilha) throws SQLException {
-        String sql = "INSERT INTO turista_por_estado_mes (ano, mes, quantidade_turista, planilha_idplanilha, estado_idestado, meio_idmodal) "
+        String sql = "INSERT INTO turista_por_estado_mes (ano, mes, quantidade_turista, planilha_idplanilha, uf_iduf, meio_idmodal) "
               + "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conexao.prepareStatement(sql)) {
             ps.setString(1, String.valueOf(turista.getAno()));
@@ -73,10 +73,10 @@ public class TuristaDao {
 
     private Integer idEstado(String nome, String sigla) throws SQLException {
         if (!idsEstado.containsKey(sigla)) {
-            Integer id = buscarId("SELECT idestado FROM estado WHERE sigla = ?", sigla);
+            Integer id = buscarId("SELECT iduf FROM uf WHERE sigla = ?", sigla);
             if (id == null) {
-                id = inserir("INSERT INTO estado (sigla, nome) VALUES (?, ?)", sigla, nome);
-                System.out.println("[BANCO] Estado cadastrado: " + sigla + " - " + nome);
+                id = inserir("INSERT INTO uf (sigla, nome) VALUES (?, ?)", sigla, nome);
+                System.out.println("[BANCO] UF cadastrada: " + sigla + " - " + nome);
             }
             idsEstado.put(sigla, id);
         }

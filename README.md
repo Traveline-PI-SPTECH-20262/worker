@@ -44,14 +44,14 @@ As variáveis de ambiente têm prioridade sobre o `.env`.
 | `RecomendacaoDao` | Monta o top 10 de países e de estados e grava em `recomendacoes`. |
 | `EnviadorEmail` | Manda as recomendações para o e-mail da agência (Jakarta Mail, SMTP). |
 | `Config` | Lê o `.env`. |
-| `TuristaDao` | Insere os turistas e cadastra `pais`, `estado` e `meio` quando ainda não existem. |
+| `TuristaDao` | Insere os turistas e cadastra `pais`, `uf` e `meio` quando ainda não existem. |
 
 ## De onde vem cada dado
 
 | Tabela | Abas |
 |---|---|
 | `turista_por_pais_mes` e `pais` | `Brasil_1.3` (aérea), `Brasil_1.4` (terrestre), `Brasil_1.5` (marítima), `Brasil_1.6` (fluvial) |
-| `turista_por_estado_mes` e `estado` | `SÍNTESE BRASIL_3.4` (aérea), `SINTESE BRASIL_3.5-3.6` (terrestre e marítima), `SINTESE BRASIL_3.7` (fluvial) |
+| `turista_por_estado_mes` e `uf` | `SÍNTESE BRASIL_3.4` (aérea), `SINTESE BRASIL_3.5-3.6` (terrestre e marítima), `SINTESE BRASIL_3.7` (fluvial) |
 
 A via vem do título de cada tabela e vira o `meio`: aérea = Avião, terrestre = Ônibus, marítima = Navio, fluvial = Barco.
 
@@ -64,7 +64,7 @@ Depois de gravar a planilha, o `Main` pega o top 10 de países e o top 10 de est
 - `pontuacao`: % do total de turistas
 - `nivel`: 1º ao 3º ALTO, 4º ao 7º MÉDIO, 8º ao 10º BAIXO
 - `sazonalidade`: mês com mais turistas
-- `idLocalDestino`: `idpais` ou `idestado` (a tabela ainda não tem uma coluna dizendo qual dos dois)
+- `idLocalDestino`: `idpais` ou `iduf` (a tabela ainda não tem uma coluna dizendo qual dos dois)
 
 ## Logs
 
