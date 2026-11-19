@@ -4,33 +4,30 @@ Segue o padrão do repositório [SPTECH-LP/leitura-arquivos-excel](https://githu
 
 Planilha usada: `01. a 03. Chegadas de turistas internacionais ao Brasil__A2022-2021-V49-1ed.xlsx` (raiz do projeto).
 
-## Banco (MySQL no Docker)
+## Banco
 
-O `script.sql` cria o banco `traveline` e uma agência fake (`idAgencia = 1`, usada como constante no `Main`).
+Rode o `script.sql` no MySQL. Ele cria o banco `traveline` e uma agência de teste (`idAgencia = 1`).
 
-```bash
-docker run -d --name mysql-traveline -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -v "$PWD/script.sql:/docker-entrypoint-initdb.d/script.sql:ro" mysql:8.0
-```
+As credenciais do banco e do e-mail ficam no `.env` da raiz (fora do git; copie o `.env.example`). Enquanto `EMAIL_HOST`, `EMAIL_USUARIO` e `EMAIL_SENHA` estiverem vazios, o e-mail só é impresso no console.
 
-Depois disso, basta `docker start mysql-traveline`. As credenciais do banco e do e-mail ficam no `.env` da raiz (fora do git; copie o `.env.example`). Enquanto `EMAIL_HOST`, `EMAIL_USUARIO` e `EMAIL_SENHA` estiverem vazios, o e-mail só é impresso no console.
+## Agência
+
+A agência dona dos dados é a constante `ID_AGENCIA` no `Main`. O valor que estiver ali é o que vai para o log e para o banco. A agência precisa existir na tabela `agencia`.
+
+Depois de trocar o valor, recompile (**Build → Rebuild Project** no IntelliJ ou `mvn clean package`); senão roda o `.class` antigo.
 
 ## Como rodar
 
-Execute a classe `Main` no IntelliJ. Cada execução registra uma nova linha em `planilha` e grava os turistas ligados a ela.
+No IntelliJ: execute a classe `Main`.
 
-## Rodando com Docker
-
-Com o MySQL de pé, gere a imagem e rode o worker. O `DB_URL` aponta para o MySQL da sua máquina (`host.docker.internal`):
+Pelo jar (na raiz do projeto, onde estão o `.env` e a planilha):
 
 ```bash
-docker build -t traveline-worker .
+mvn clean package
+java -jar target/worker-jar-with-dependencies.jar
 ```
 
-```bash
-docker run --rm --env-file .env -e DB_URL=jdbc:mysql://host.docker.internal:3306/traveline traveline-worker
-```
-
-As variáveis de ambiente têm prioridade sobre o `.env`.
+Cada execução registra uma nova linha em `planilha` e grava os turistas ligados a ela.
 
 ## Classes
 
