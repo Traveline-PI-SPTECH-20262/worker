@@ -1,6 +1,5 @@
 package school.sptech;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,13 +34,10 @@ public class LeitorExcel {
           Map.entry("Santa Catarina", "SC"), Map.entry("São Paulo", "SP"), Map.entry("Sergipe", "SE"),
           Map.entry("Tocantins", "TO"));
 
-    public List<TuristaPorPais> extrairTuristasPorPais(String nomeArquivo) {
+    public List<TuristaPorPais> extrairTuristasPorPais(InputStream arquivo) {
         List<TuristaPorPais> turistas = new ArrayList<>();
 
-        try (
-              InputStream arquivo = new FileInputStream(nomeArquivo);
-              Workbook workbook = new XSSFWorkbook(arquivo)
-        ) {
+        try (Workbook workbook = new XSSFWorkbook(arquivo)) {
             for (String aba : ABAS_PAIS) {
                 Sheet sheet = workbook.getSheet(aba);
                 System.out.println("[POI] Lendo aba " + aba);
@@ -99,18 +95,15 @@ public class LeitorExcel {
             System.out.println("[POI] " + turistas.size() + " registros de turistas por país lidos");
             return turistas;
         } catch (IOException e) {
-            System.out.println("[POI] Erro ao ler " + nomeArquivo + ": " + e.getMessage());
+            System.out.println("[POI] Erro ao ler a planilha: " + e.getMessage());
             return turistas;
         }
     }
 
-    public List<TuristaPorEstado> extrairTuristasPorEstado(String nomeArquivo) {
+    public List<TuristaPorEstado> extrairTuristasPorEstado(InputStream arquivo) {
         List<TuristaPorEstado> turistas = new ArrayList<>();
 
-        try (
-              InputStream arquivo = new FileInputStream(nomeArquivo);
-              Workbook workbook = new XSSFWorkbook(arquivo)
-        ) {
+        try (Workbook workbook = new XSSFWorkbook(arquivo)) {
             for (String aba : ABAS_ESTADO) {
                 Sheet sheet = workbook.getSheet(aba);
                 System.out.println("[POI] Lendo aba " + aba);
@@ -152,7 +145,7 @@ public class LeitorExcel {
             System.out.println("[POI] " + turistas.size() + " registros de turistas por estado lidos");
             return turistas;
         } catch (IOException e) {
-            System.out.println("[POI] Erro ao ler " + nomeArquivo + ": " + e.getMessage());
+            System.out.println("[POI] Erro ao ler a planilha: " + e.getMessage());
             return turistas;
         }
     }

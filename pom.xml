@@ -42,6 +42,13 @@
       <version>2.0.3</version>
     </dependency>
 
+    <!-- AWS SDK v2: leitura das planilhas no bucket S3 -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+      <version>2.27.21</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>

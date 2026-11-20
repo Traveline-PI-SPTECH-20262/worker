@@ -11,9 +11,12 @@ import java.util.Properties;
 
 public class EnviadorEmail {
     public void enviar(String para, List<Recomendacao> recomendacoes) throws Exception {
-        String assunto = "Traveline - Recomendações";
-        String texto = montarTexto(recomendacoes);
+        enviarTexto(para, "Traveline - Recomendações", montarTexto(recomendacoes));
+    }
 
+    // Envio genérico de um e-mail de texto. Com as credenciais vazias no .env,
+    // o conteúdo é só impresso no console (modo desenvolvimento).
+    private void enviarTexto(String para, String assunto, String texto) throws Exception {
         String host = Config.get("EMAIL_HOST");
         String usuario = Config.get("EMAIL_USUARIO");
         String senha = Config.get("EMAIL_SENHA");
@@ -40,7 +43,21 @@ public class EnviadorEmail {
         mensagem.setText(texto);
 
         Transport.send(mensagem, usuario, senha);
-        System.out.println("[EMAIL] Recomendações enviadas para " + para);
+        System.out.println("[EMAIL] E-mail \"" + assunto + "\" enviado para " + para);
+    }
+
+    // Aviso de que a análise de dados de um arquivo falhou.
+    public void enviarErro(String para, String nomeArquivo, String detalhe) throws Exception {
+        String assunto = "Traveline - Problema ao realizar análise de dados";
+        StringBuilder texto = new StringBuilder("Houve um problema ao realizar a análise de dados");
+        if (nomeArquivo != null) {
+            texto.append(" do arquivo ").append(nomeArquivo);
+        }
+        texto.append(".\n");
+        if (detalhe != null) {
+            texto.append("Detalhe: ").append(detalhe).append("\n");
+        }
+        enviarTexto(para, assunto, texto.toString());
     }
 
     private String montarTexto(List<Recomendacao> recomendacoes) {

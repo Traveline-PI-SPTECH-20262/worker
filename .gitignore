@@ -1,0 +1,12 @@
+# Credenciais (nunca versionar)
+.env
+
+# Build
+target/
+
+# IntelliJ
+.idea/workspace.xml
+*.iml
+
+# macOS
+.DS_Store

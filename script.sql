@@ -45,17 +45,43 @@ CREATE TABLE codigo_ativacao (
         REFERENCES agencia(idAgencia)
 );
 
+CREATE TABLE tela (
+    idTela INT AUTO_INCREMENT PRIMARY KEY,
+    tela VARCHAR(13) NOT NULL UNIQUE,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE cargo (
+    idCargo INT AUTO_INCREMENT PRIMARY KEY,
+    cargo VARCHAR(13) NOT NULL UNIQUE,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE permissao (
+    idPermissao INT AUTO_INCREMENT PRIMARY KEY,
+    idTela INT NOT NULL,
+    idCargo INT NOT NULL,
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (idTela) REFERENCES tela(idTela),
+    FOREIGN KEY (idCargo) REFERENCES cargo(idCargo)
+);
+
 CREATE TABLE usuario (
     idusuario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    cargo VARCHAR(50),
+    cargo VARCHAR(13) NOT NULL,
     idAgencia INT NOT NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (idAgencia)
-        REFERENCES agencia(idAgencia)
+        REFERENCES agencia(idAgencia),
+    -- corrigido: cargo é VARCHAR, então referencia a coluna de texto cargo.cargo (UNIQUE),
+    -- e não cargo.idCargo (INT), que causava "Foreign key constraint is incorrectly formed"
+    FOREIGN KEY (cargo)
+        REFERENCES cargo(cargo)
 );
 
 CREATE TABLE preferencias_usuario (
@@ -67,8 +93,6 @@ CREATE TABLE preferencias_usuario (
     viaMaritima TINYINT NOT NULL DEFAULT 1,
     viaFluvial TINYINT NOT NULL DEFAULT 1,
     paisesEmissores TINYINT NOT NULL DEFAULT 1,
-    notificacoesAtivas TINYINT NOT NULL DEFAULT 1,
-    frequencia ENUM('modoTeste', 'diaria', 'semanal', 'mensal') NOT NULL DEFAULT 'mensal',
 
     FOREIGN KEY (idUsuario) REFERENCES usuario(idusuario)
 );
@@ -182,10 +206,3 @@ CREATE TABLE log_java (
     dataHora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
--- Agência de teste (o código de ativação agora fica na tabela codigo_ativacao)
-INSERT INTO agencia (nome, cnpj, email, dataCadastro, telefone)
-VALUES ('Agencia Teste', '00.000.000/0001-00', 'teste@agencia.com', CURDATE(), '(11) 99999-9999');
-
-INSERT INTO codigo_ativacao (codigo, idAgencia)
-VALUES ('TESTE123', 1);
