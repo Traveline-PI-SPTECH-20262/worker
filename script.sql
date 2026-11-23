@@ -46,23 +46,23 @@ CREATE TABLE codigo_ativacao (
 );
 
 CREATE TABLE tela (
-    idTela INT AUTO_INCREMENT PRIMARY KEY,
+	idTela INT AUTO_INCREMENT PRIMARY KEY,
     tela VARCHAR(13) NOT NULL UNIQUE,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE cargo (
-    idCargo INT AUTO_INCREMENT PRIMARY KEY,
+	idCargo INT AUTO_INCREMENT PRIMARY KEY,
     cargo VARCHAR(13) NOT NULL UNIQUE,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE permissao (
-    idPermissao INT AUTO_INCREMENT PRIMARY KEY,
+	idPermissao INT AUTO_INCREMENT PRIMARY KEY,
     idTela INT NOT NULL,
     idCargo INT NOT NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
+    
     FOREIGN KEY (idTela) REFERENCES tela(idTela),
     FOREIGN KEY (idCargo) REFERENCES cargo(idCargo)
 );
@@ -72,20 +72,18 @@ CREATE TABLE usuario (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
     senha VARCHAR(255) NOT NULL,
-    cargo VARCHAR(13) NOT NULL,
+    idCargo INT NOT NULL,
     idAgencia INT NOT NULL,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (idAgencia)
         REFERENCES agencia(idAgencia),
-    -- corrigido: cargo é VARCHAR, então referencia a coluna de texto cargo.cargo (UNIQUE),
-    -- e não cargo.idCargo (INT), que causava "Foreign key constraint is incorrectly formed"
-    FOREIGN KEY (cargo)
-        REFERENCES cargo(cargo)
+    FOREIGN KEY (idCargo)
+        REFERENCES cargo(idCargo)
 );
 
 CREATE TABLE preferencias_usuario (
-    idUsuario INT PRIMARY KEY,
+	idUsuario INT PRIMARY KEY,
     temaClaro TINYINT NOT NULL DEFAULT 1,
     totalTuristas TINYINT NOT NULL DEFAULT 1,
     viaAerea TINYINT NOT NULL DEFAULT 1,
@@ -93,13 +91,14 @@ CREATE TABLE preferencias_usuario (
     viaMaritima TINYINT NOT NULL DEFAULT 1,
     viaFluvial TINYINT NOT NULL DEFAULT 1,
     paisesEmissores TINYINT NOT NULL DEFAULT 1,
-
+    
     FOREIGN KEY (idUsuario) REFERENCES usuario(idusuario)
 );
 
 CREATE TABLE planilha (
     idplanilha INT AUTO_INCREMENT PRIMARY KEY,
     caminho VARCHAR(255) NOT NULL,
+    nome VARCHAR(60) NOT NULL,
     dataHora DATETIME,
     situacao VARCHAR(45),
     dataInicio DATE,
