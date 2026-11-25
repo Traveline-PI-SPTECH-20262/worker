@@ -205,3 +205,50 @@ CREATE TABLE log_java (
     dataHora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+INSERT INTO agencia
+(idAgencia, nome, cnpj, email, dataCadastro, telefone)
+VALUES
+(1, 'Traveline Turismo', '12.345.678/0001-90', 'contato@travelineturismo.com', '2026-10-01', '(11) 99999-1111'),
+(2, 'Global Travel', '23.456.789/0001-01', 'guilhermesdomingues31@gmail.com', '2026-10-05', '(11) 99999-2222'),
+(3, 'Mundo Viagens', '34.567.890/0001-12', 'contato@mundoviagens.com', '2026-10-10', '(21) 99999-3333');
+
+INSERT INTO codigo_ativacao
+(idcodigo, codigo, status, gerado_em, idAgencia)
+VALUES
+(1, 'TRAVELINE001', 1, '2026-10-01 09:00:00', 1),
+(2, 'GLOBAL002', 1, '2026-10-05 09:00:00', 2),
+(3, 'MUNDO003', 1, '2026-10-10 09:00:00', 3),
+(4, 'TRAVELINE-ANTIGO', 0, '2026-09-01 09:00:00', 1),
+(5, 'GLOBAL-ANTIGO', 0, '2026-09-05 09:00:00', 2),
+(6, 'MUNDO-ANTIGO', 0, '2026-09-10 09:00:00', 3);
+
+INSERT INTO cargo (cargo)
+VALUES
+('Administrador'),
+('Gerente'),
+('Analista')
+ON DUPLICATE KEY UPDATE cargo = VALUES(cargo);
+
+-- Busca os IDs para funcionar mesmo com cargos já cadastrados.
+SET @administrador = (SELECT idCargo FROM cargo WHERE cargo = 'Administrador');
+SET @gerente = (SELECT idCargo FROM cargo WHERE cargo = 'Gerente');
+SET @analista = (SELECT idCargo FROM cargo WHERE cargo = 'Analista');
+
+INSERT INTO usuario
+(idusuario, nome, email, senha, idCargo, idAgencia)
+VALUES
+(1, 'Guilherme Silva', 'guilherme@travelineturismo.com', '123456', @administrador, 1),
+(2, 'Ana Souza', 'ana@travelineturismo.com', '123456', @analista, 1),
+(3, 'Carlos Oliveira', 'carlos@globaltravel.com', '123456', @gerente, 2),
+(4, 'Mariana Costa', 'mariana@globaltravel.com', '123456', @analista, 2),
+(5, 'Pedro Santos', 'pedro@mundoviagens.com', '123456', @administrador, 3);
+
+INSERT INTO preferencias_usuario
+(idUsuario, temaClaro, totalTuristas, viaAerea, viaTerrestre, viaMaritima, viaFluvial, paisesEmissores)
+VALUES
+(1, 1, 1, 1, 1, 1, 1, 1),
+(2, 1, 1, 1, 1, 1, 1, 1),
+(3, 1, 1, 1, 1, 1, 1, 1),
+(4, 1, 1, 1, 1, 1, 1, 1),
+(5, 1, 1, 1, 1, 1, 1, 1);
