@@ -51,6 +51,10 @@ public class Worker {
                 continue;
             }
 
+            if (planilhaDao.jaRegistrada(arquivo.getChave())) {
+                continue;
+            }
+
             // Qualquer erro em um arquivo não impede os próximos:
             // o problema é avisado por e-mail à agência e o loop segue.
             try {
@@ -66,14 +70,15 @@ public class Worker {
         Integer idAgencia = agencia.getIdAgencia();
         Log.info(Worker.class, "[WORKER] Processando " + arquivo + " da agência " + idAgencia + " (" + agencia.getNome() + ")");
 
-        // 3. Baixa a planilha do S3 e lê com Apache POI
-        byte[] conteudo = leitorS3.baixar(arquivo);
-        List<TuristaPorPais> turistasPorPais = leitorExcel.extrairTuristasPorPais(new ByteArrayInputStream(conteudo));
-        List<TuristaPorEstado> turistasPorEstado = leitorExcel.extrairTuristasPorEstado(new ByteArrayInputStream(conteudo));
-
-        // 4. Grava os dados ligados à agência dona do arquivo
+        // 3. Registra a planilha, baixa do S3 e lê com Apache POI.
+        // Registrando antes, um arquivo com erro fica como ERRO e não é reprocessado a cada execução.
         Integer idPlanilha = planilhaDao.inserir(arquivo.getChave(), idAgencia);
         try {
+            byte[] conteudo = leitorS3.baixar(arquivo);
+            List<TuristaPorPais> turistasPorPais = leitorExcel.extrairTuristasPorPais(new ByteArrayInputStream(conteudo));
+            List<TuristaPorEstado> turistasPorEstado = leitorExcel.extrairTuristasPorEstado(new ByteArrayInputStream(conteudo));
+
+            // 4. Grava os dados ligados à agência dona do arquivo
             for (TuristaPorPais turista : turistasPorPais) {
                 turistaDao.inserirPorPais(turista, idPlanilha);
             }

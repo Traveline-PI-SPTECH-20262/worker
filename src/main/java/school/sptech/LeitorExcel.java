@@ -40,6 +40,9 @@ public class LeitorExcel {
         try (Workbook workbook = new XSSFWorkbook(arquivo)) {
             for (String aba : ABAS_PAIS) {
                 Sheet sheet = workbook.getSheet(aba);
+                if (sheet == null) {
+                    throw new IllegalArgumentException("planilha fora do modelo esperado, aba \"" + aba + "\" não encontrada");
+                }
                 Log.info(LeitorExcel.class, "[POI] Lendo aba " + aba);
 
                 String meio = null;
@@ -106,6 +109,9 @@ public class LeitorExcel {
         try (Workbook workbook = new XSSFWorkbook(arquivo)) {
             for (String aba : ABAS_ESTADO) {
                 Sheet sheet = workbook.getSheet(aba);
+                if (sheet == null) {
+                    throw new IllegalArgumentException("planilha fora do modelo esperado, aba \"" + aba + "\" não encontrada");
+                }
                 Log.info(LeitorExcel.class, "[POI] Lendo aba " + aba);
 
                 String meio = null;
