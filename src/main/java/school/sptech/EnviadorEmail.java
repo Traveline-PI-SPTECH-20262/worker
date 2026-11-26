@@ -14,18 +14,15 @@ public class EnviadorEmail {
         enviarTexto(para, "Traveline - Recomendações", montarTexto(recomendacoes));
     }
 
-    // Envio genérico de um e-mail de texto. Com as credenciais vazias no .env,
-    // o conteúdo é só impresso no console (modo desenvolvimento).
+
     private void enviarTexto(String para, String assunto, String texto) throws Exception {
         String host = Config.get("EMAIL_HOST");
         String usuario = Config.get("EMAIL_USUARIO");
         String senha = Config.get("EMAIL_SENHA");
 
         if (host.isEmpty() || usuario.isEmpty() || senha.isEmpty()) {
-            System.out.println("[EMAIL] Credenciais vazias no .env, e-mail não enviado. Conteúdo:");
-            System.out.println("Para: " + para);
-            System.out.println("Assunto: " + assunto);
-            System.out.println(texto);
+            Log.info(EnviadorEmail.class, "[EMAIL] Credenciais vazias no .env, e-mail não enviado. Conteúdo:\n"
+                  + "Para: " + para + "\nAssunto: " + assunto + "\n" + texto);
             return;
         }
 
@@ -43,10 +40,10 @@ public class EnviadorEmail {
         mensagem.setText(texto);
 
         Transport.send(mensagem, usuario, senha);
-        System.out.println("[EMAIL] E-mail \"" + assunto + "\" enviado para " + para);
+        Log.info(EnviadorEmail.class, "[EMAIL] E-mail \"" + assunto + "\" enviado para " + para);
     }
 
-    // Aviso de que a análise de dados de um arquivo falhou.
+
     public void enviarErro(String para, String nomeArquivo, String detalhe) throws Exception {
         String assunto = "Traveline - Problema ao realizar análise de dados";
         StringBuilder texto = new StringBuilder("Houve um problema ao realizar a análise de dados");

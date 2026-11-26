@@ -91,6 +91,7 @@ CREATE TABLE preferencias_usuario (
     viaMaritima TINYINT NOT NULL DEFAULT 1,
     viaFluvial TINYINT NOT NULL DEFAULT 1,
     paisesEmissores TINYINT NOT NULL DEFAULT 1,
+    receberEmail TINYINT NOT NULL DEFAULT 1,
     
     FOREIGN KEY (idUsuario) REFERENCES usuario(idusuario)
 );

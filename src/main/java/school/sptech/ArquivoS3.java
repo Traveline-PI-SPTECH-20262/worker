@@ -1,8 +1,6 @@
 package school.sptech;
 
-// Um arquivo (objeto) do bucket S3.
-// O nome segue o padrão "<idAgencia>-<qualquer coisa>.xlsx": o número antes do
-// primeiro "-" diz de qual agência é a planilha.
+
 public class ArquivoS3 {
     private String chave;
 

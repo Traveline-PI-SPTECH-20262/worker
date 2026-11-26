@@ -52,7 +52,7 @@ public class TuristaDao {
             Integer id = buscarId("SELECT idmodal FROM meio WHERE tipo = ?", tipo);
             if (id == null) {
                 id = inserir("INSERT INTO meio (tipo) VALUES (?)", tipo);
-                System.out.println("[BANCO] Meio cadastrado: " + tipo);
+                Log.info(TuristaDao.class, "[BANCO] Meio cadastrado: " + tipo);
             }
             idsMeio.put(tipo, id);
         }
@@ -64,7 +64,7 @@ public class TuristaDao {
             Integer id = buscarId("SELECT idpais FROM pais WHERE nome = ?", nome);
             if (id == null) {
                 id = inserir("INSERT INTO pais (nome, continente) VALUES (?, ?)", nome, continente);
-                System.out.println("[BANCO] País cadastrado: " + nome + " (" + continente + ")");
+                Log.info(TuristaDao.class, "[BANCO] País cadastrado: " + nome + " (" + continente + ")");
             }
             idsPais.put(nome, id);
         }
@@ -76,7 +76,7 @@ public class TuristaDao {
             Integer id = buscarId("SELECT iduf FROM uf WHERE sigla = ?", sigla);
             if (id == null) {
                 id = inserir("INSERT INTO uf (sigla, nome) VALUES (?, ?)", sigla, nome);
-                System.out.println("[BANCO] UF cadastrada: " + sigla + " - " + nome);
+                Log.info(TuristaDao.class, "[BANCO] UF cadastrada: " + sigla + " - " + nome);
             }
             idsEstado.put(sigla, id);
         }

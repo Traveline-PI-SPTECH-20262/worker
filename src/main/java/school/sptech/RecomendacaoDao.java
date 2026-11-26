@@ -46,7 +46,7 @@ public class RecomendacaoDao {
             ps.setInt(4, idAgencia);
             ps.setInt(5, recomendacao.getIdLocal());
             ps.executeUpdate();
-            System.out.println("[BANCO] Recomendação gravada: " + recomendacao);
+            Log.info(RecomendacaoDao.class, "[BANCO] Recomendação gravada: " + recomendacao);
         }
     }
 

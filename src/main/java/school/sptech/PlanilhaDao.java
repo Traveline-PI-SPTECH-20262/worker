@@ -24,7 +24,7 @@ public class PlanilhaDao {
             ResultSet chave = ps.getGeneratedKeys();
             chave.next();
             Integer id = chave.getInt(1);
-            System.out.println("[BANCO] Planilha registrada com id " + id);
+            Log.info(PlanilhaDao.class, "[BANCO] Planilha registrada com id " + id);
             return id;
         }
     }
@@ -35,7 +35,7 @@ public class PlanilhaDao {
             ps.setString(1, situacao);
             ps.setInt(2, idPlanilha);
             ps.executeUpdate();
-            System.out.println("[BANCO] Planilha " + idPlanilha + " com situação " + situacao);
+            Log.info(PlanilhaDao.class, "[BANCO] Planilha " + idPlanilha + " com situação " + situacao);
         }
     }
 }

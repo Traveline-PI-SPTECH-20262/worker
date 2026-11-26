@@ -22,7 +22,7 @@ public class AgenciaDao {
                 agencias.add(new Agencia(rs.getInt("idAgencia"), rs.getString("nome"), rs.getString("email")));
             }
         }
-        System.out.println("[BANCO] " + agencias.size() + " agência(s) cadastrada(s)");
+        Log.info(AgenciaDao.class, "[BANCO] " + agencias.size() + " agência(s) cadastrada(s)");
         return agencias;
     }
 }

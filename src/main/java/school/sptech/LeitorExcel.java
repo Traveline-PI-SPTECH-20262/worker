@@ -40,7 +40,7 @@ public class LeitorExcel {
         try (Workbook workbook = new XSSFWorkbook(arquivo)) {
             for (String aba : ABAS_PAIS) {
                 Sheet sheet = workbook.getSheet(aba);
-                System.out.println("[POI] Lendo aba " + aba);
+                Log.info(LeitorExcel.class, "[POI] Lendo aba " + aba);
 
                 String meio = null;
                 String continente = null;
@@ -92,10 +92,10 @@ public class LeitorExcel {
                 }
             }
 
-            System.out.println("[POI] " + turistas.size() + " registros de turistas por país lidos");
+            Log.info(LeitorExcel.class, "[POI] " + turistas.size() + " registros de turistas por país lidos");
             return turistas;
         } catch (IOException e) {
-            System.out.println("[POI] Erro ao ler a planilha: " + e.getMessage());
+            Log.erro(LeitorExcel.class, "[POI] Erro ao ler a planilha: " + e.getMessage());
             return turistas;
         }
     }
@@ -106,7 +106,7 @@ public class LeitorExcel {
         try (Workbook workbook = new XSSFWorkbook(arquivo)) {
             for (String aba : ABAS_ESTADO) {
                 Sheet sheet = workbook.getSheet(aba);
-                System.out.println("[POI] Lendo aba " + aba);
+                Log.info(LeitorExcel.class, "[POI] Lendo aba " + aba);
 
                 String meio = null;
                 Row cabecalhoEstados = null;
@@ -142,10 +142,10 @@ public class LeitorExcel {
                 }
             }
 
-            System.out.println("[POI] " + turistas.size() + " registros de turistas por estado lidos");
+            Log.info(LeitorExcel.class, "[POI] " + turistas.size() + " registros de turistas por estado lidos");
             return turistas;
         } catch (IOException e) {
-            System.out.println("[POI] Erro ao ler a planilha: " + e.getMessage());
+            Log.erro(LeitorExcel.class, "[POI] Erro ao ler a planilha: " + e.getMessage());
             return turistas;
         }
     }

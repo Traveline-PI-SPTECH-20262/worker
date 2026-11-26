@@ -8,8 +8,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
-// Cria o cliente do S3 (baseado no SPTECH-LP/bucket-s3-exemplo-v2),
-// lendo as credenciais sempre do .env.
+
 public class S3Provider {
     private final AwsCredentialsProvider credentials;
 
@@ -20,7 +19,7 @@ public class S3Provider {
 
         if (accessKey.isEmpty() || secretKey.isEmpty()) {
             // Sem chaves no .env: usa a cadeia padrão da AWS (ex.: role da EC2)
-            System.out.println("[S3] Chaves da AWS vazias no .env, usando DefaultCredentialsProvider");
+            Log.info(S3Provider.class, "[S3] Chaves da AWS vazias no .env, usando DefaultCredentialsProvider");
             this.credentials = DefaultCredentialsProvider.create();
         } else if (sessionToken.isEmpty()) {
             this.credentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));

@@ -17,7 +17,7 @@ public class Config {
             try (InputStream arquivo = new FileInputStream(".env")) {
                 propriedades.load(arquivo);
             } catch (IOException e) {
-                System.out.println("[CONFIG] Arquivo .env não encontrado: " + e.getMessage());
+                Log.info(Config.class, "[CONFIG] Arquivo .env não encontrado: " + e.getMessage());
             }
         }
         return propriedades.getProperty(chave, "").trim();

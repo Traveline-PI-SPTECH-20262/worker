@@ -16,14 +16,16 @@ public class Worker {
     private PlanilhaDao planilhaDao;
     private TuristaDao turistaDao;
     private RecomendacaoDao recomendacaoDao;
+    private UsuarioDao usuarioDao;
 
     public Worker(LeitorS3 leitorS3, AgenciaDao agenciaDao, PlanilhaDao planilhaDao, TuristaDao turistaDao,
-          RecomendacaoDao recomendacaoDao) {
+          RecomendacaoDao recomendacaoDao, UsuarioDao usuarioDao) {
         this.leitorS3 = leitorS3;
         this.agenciaDao = agenciaDao;
         this.planilhaDao = planilhaDao;
         this.turistaDao = turistaDao;
         this.recomendacaoDao = recomendacaoDao;
+        this.usuarioDao = usuarioDao;
         this.leitorExcel = new LeitorExcel();
         this.enviadorEmail = new EnviadorEmail();
     }
@@ -39,13 +41,13 @@ public class Worker {
         for (ArquivoS3 arquivo : leitorS3.listarArquivos()) {
             Integer idAgencia = arquivo.getIdAgencia();
             if (idAgencia == null) {
-                System.out.println("[WORKER] Ignorado, nome fora do padrão <idAgencia>-<nome>.xlsx: " + arquivo);
+                Log.info(Worker.class, "[WORKER] Ignorado, nome fora do padrão <idAgencia>-<nome>.xlsx: " + arquivo);
                 continue;
             }
 
             Agencia agencia = agencias.get(idAgencia);
             if (agencia == null) {
-                System.out.println("[WORKER] Ignorado, agência " + idAgencia + " não existe no banco: " + arquivo);
+                Log.info(Worker.class, "[WORKER] Ignorado, agência " + idAgencia + " não existe no banco: " + arquivo);
                 continue;
             }
 
@@ -54,7 +56,7 @@ public class Worker {
             try {
                 processarArquivo(arquivo, agencia);
             } catch (Exception e) {
-                System.out.println("[WORKER] Erro ao processar " + arquivo + ": " + e.getMessage());
+                Log.erro(Worker.class, "[WORKER] Erro ao processar " + arquivo + ": " + e.getMessage());
                 avisarErro(agencia, arquivo, e);
             }
         }
@@ -62,7 +64,7 @@ public class Worker {
 
     private void processarArquivo(ArquivoS3 arquivo, Agencia agencia) throws Exception {
         Integer idAgencia = agencia.getIdAgencia();
-        System.out.println("[WORKER] Processando " + arquivo + " da agência " + idAgencia + " (" + agencia.getNome() + ")");
+        Log.info(Worker.class, "[WORKER] Processando " + arquivo + " da agência " + idAgencia + " (" + agencia.getNome() + ")");
 
         // 3. Baixa a planilha do S3 e lê com Apache POI
         byte[] conteudo = leitorS3.baixar(arquivo);
@@ -75,12 +77,12 @@ public class Worker {
             for (TuristaPorPais turista : turistasPorPais) {
                 turistaDao.inserirPorPais(turista, idPlanilha);
             }
-            System.out.println("[BANCO] " + turistasPorPais.size() + " linhas em turista_por_pais_mes");
+            Log.info(Worker.class, "[BANCO] " + turistasPorPais.size() + " linhas em turista_por_pais_mes");
 
             for (TuristaPorEstado turista : turistasPorEstado) {
                 turistaDao.inserirPorEstado(turista, idPlanilha);
             }
-            System.out.println("[BANCO] " + turistasPorEstado.size() + " linhas em turista_por_estado_mes");
+            Log.info(Worker.class, "[BANCO] " + turistasPorEstado.size() + " linhas em turista_por_estado_mes");
 
             planilhaDao.atualizarSituacao(idPlanilha, "CONCLUIDA");
         } catch (Exception e) {
@@ -96,16 +98,47 @@ public class Worker {
             recomendacaoDao.inserir(recomendacao, idAgencia);
         }
 
-        enviadorEmail.enviar(agencia.getEmail(), recomendacoes);
+        for (Usuario usuario : usuariosParaNotificar(agencia)) {
+            try {
+                enviadorEmail.enviar(usuario.getEmail(), recomendacoes);
+            } catch (Exception e) {
+                Log.erro(Worker.class, "[EMAIL] Falha ao enviar para " + usuario.getEmail() + ": " + e.getMessage());
+            }
+        }
     }
 
-    // Avisa a agência por e-mail quando um arquivo falha. O e-mail nunca pode
+    // Usuários da agência que aceitam e-mail. Quem desativou é pulado.
+    private List<Usuario> usuariosParaNotificar(Agencia agencia) throws Exception {
+        List<Usuario> destinatarios = new ArrayList<>();
+        for (Usuario usuario : usuarioDao.listarPorAgencia(agencia.getIdAgencia())) {
+            if (usuario.isReceberEmail()) {
+                destinatarios.add(usuario);
+            } else {
+                Log.info(Worker.class, "[EMAIL] " + usuario.getEmail() + " não recebe e-mails (preferência), pulando");
+            }
+        }
+        if (destinatarios.isEmpty()) {
+            Log.info(Worker.class, "[EMAIL] Nenhum usuário da agência " + agencia.getIdAgencia() + " para notificar");
+        }
+        return destinatarios;
+    }
+
+    // Avisa os usuários da agência por e-mail quando um arquivo falha. O e-mail nunca pode
     // derrubar o worker, então o erro de envio é só logado.
     private void avisarErro(Agencia agencia, ArquivoS3 arquivo, Exception causa) {
+        List<Usuario> destinatarios;
         try {
-            enviadorEmail.enviarErro(agencia.getEmail(), arquivo.getNome(), causa.getMessage());
+            destinatarios = usuariosParaNotificar(agencia);
         } catch (Exception e) {
-            System.out.println("[EMAIL] Falha ao avisar erro para " + agencia.getEmail() + ": " + e.getMessage());
+            Log.erro(Worker.class, "[EMAIL] Falha ao buscar usuários da agência " + agencia.getIdAgencia() + ": " + e.getMessage());
+            return;
+        }
+        for (Usuario usuario : destinatarios) {
+            try {
+                enviadorEmail.enviarErro(usuario.getEmail(), arquivo.getNome(), causa.getMessage());
+            } catch (Exception e) {
+                Log.erro(Worker.class, "[EMAIL] Falha ao avisar erro para " + usuario.getEmail() + ": " + e.getMessage());
+            }
         }
     }
 }

@@ -28,10 +28,10 @@ public class LeitorS3 {
             if (objeto.key().toLowerCase().endsWith(".xlsx")) {
                 arquivos.add(new ArquivoS3(objeto.key()));
             } else {
-                System.out.println("[S3] Ignorado (não é .xlsx): " + objeto.key());
+                Log.info(LeitorS3.class, "[S3] Ignorado (não é .xlsx): " + objeto.key());
             }
         }
-        System.out.println("[S3] " + arquivos.size() + " planilha(s) no bucket " + bucket);
+        Log.info(LeitorS3.class, "[S3] " + arquivos.size() + " planilha(s) no bucket " + bucket);
         return arquivos;
     }
 
@@ -42,7 +42,7 @@ public class LeitorS3 {
               .key(arquivo.getChave())
               .build();
         byte[] conteudo = s3Client.getObjectAsBytes(requisicao).asByteArray();
-        System.out.println("[S3] Baixado " + arquivo.getChave() + " (" + conteudo.length + " bytes)");
+        Log.info(LeitorS3.class, "[S3] Baixado " + arquivo.getChave() + " (" + conteudo.length + " bytes)");
         return conteudo;
     }
 }
